@@ -32,7 +32,6 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Top = 144
     Width = 3
     Height = 13
-    OnClick = lblStatusClick
   end
   object btnRead: TButton
     Left = 97
@@ -41,6 +40,7 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Height = 25
     Caption = 'Read'
     TabOrder = 0
+    OnClick = btnReadClick
   end
   object chbAutoRead: TCheckBox
     Left = 97
@@ -89,6 +89,7 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     TabOrder = 6
   end
   object tmrAutoRead: TTimer
+    OnTimer = tmrAutoReadTimer
     Left = 384
     Top = 8
   end
