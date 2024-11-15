@@ -56,6 +56,7 @@ object frmCH341A: TfrmCH341A
     ShowRoot = False
     TabOrder = 1
     OnChange = tvToolsChange
+    ExplicitTop = 40
   end
   object pages: TPageControl
     Left = 169
@@ -64,8 +65,6 @@ object frmCH341A: TfrmCH341A
     Height = 297
     Align = alClient
     TabOrder = 2
-    ExplicitLeft = 150
-    ExplicitWidth = 501
   end
   object tmrStartup: TTimer
     Interval = 200

@@ -20,7 +20,7 @@ object frmCH341I2CAHT20: TfrmCH341I2CAHT20
     Height = 13
   end
   object lblTemperature: TLabel
-    Left = 16
+    Left = 8
     Top = 88
     Width = 62
     Height = 13
@@ -52,7 +52,7 @@ object frmCH341I2CAHT20: TfrmCH341I2CAHT20
   end
   object edTemperature: TEdit
     Left = 97
-    Top = 85
+    Top = 90
     Width = 96
     Height = 21
     Color = clBtnFace
