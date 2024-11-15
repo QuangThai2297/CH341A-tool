@@ -9,6 +9,9 @@
 #include "CH341A.h"
 #include "common/BtnController.h"
 #include "stdint.h"
+#include <cstdio>
+#include <stdio.h>
+#include <stdlib.h>
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -122,6 +125,52 @@ public:
 		log_info("Date DEC: "); log_info(str);
 		return str;
 	}
+	//check format hh:mm:ss
+	bool setTimeFromString(AnsiString str)
+	{
+		int hh,mm,ss;   //should be type int
+		hh = _raw[2]; mm = _raw[1]; ss = _raw[0];
+		if(str == "") {
+			log_info("text time NULL!!!\n");
+			return false;
+        }
+		if(sscanf(str.c_str(), "%02X : %02X : %02X", &hh, &mm, &ss) == 0)
+		{
+			log_info("convert time FAIL!!!\n");
+			return false;
+        }
+		_raw[0] = ss;
+		_raw[1] = mm;
+		_raw[2] = hh;
+		String log;
+		log.sprintf("%02X : %02X : %02X", _raw[2], _raw[1], _raw[0]) ;
+		log_info("Set Time BCD: "); log_info(log);
+		return writeDateTimeRaw();
+    }
+    //check format date:month:year
+	bool setDateFromString(AnsiString str)
+	{
+		int day,date,month,year;
+		day = _raw[3], date = _raw[4]; month = _raw[5]; year = _raw[6];
+		if(str == "") {
+			log_info("text date NULL!!!\n");
+			return false;
+        }
+		if(sscanf(str.c_str(), "%X : %X : 20%X", &date, &month, &year) == 0)
+		{
+			log_info("convert date FAIL!!!\n");
+			return false;
+		}
+		_raw[3] = day;
+		_raw[4] = date;
+		_raw[5] = month;
+		_raw[6] = year;
+		String log;
+		log.sprintf("%02X : %02X : %02X", _raw[4], _raw[5], _raw[6]) ;
+		log_info("Date BCD: "); log_info(log);
+		//write to ds1307
+		return writeDateTimeRaw();
+	}
 	void init()
 	{
 		uint8_t chByte = 0;
@@ -141,21 +190,20 @@ public:
 		}
 	}
 };
+RTC_DS1307 rtc(0x05, 0x31, 0x14, 1,1,1,1);
 void TfrmCH341I2CDS1307::Clear(void)
 {
 	edTime->Text = "";
 	edDate->Text = "";
 }
 
-void TfrmCH341I2CDS1307::Read(void)
+bool TfrmCH341I2CDS1307::CheckBus(void)
 {
-   BtnController btnCtrl(btnRead);
-
 	if (!ch341a.IsOpened())
 	{
 		lblStatus->Caption = "CH341 is not opened!";
 		Clear();
-		return;
+		return false;
 	}
 
 	int status = ch341a.I2CCheckDev(RTC_DS1307::ADDRESS);
@@ -163,11 +211,19 @@ void TfrmCH341I2CDS1307::Read(void)
 	{
 		lblStatus->Caption = "No ACK after sending expected I2C address!";
 		Clear();
-		return;
+		return false;
 	}
 
-	RTC_DS1307 rtc(0x05, 0x31, 0x14, 1,1,1,1);
+	return true;
+}
+void TfrmCH341I2CDS1307::Read(void)
+{
+   BtnController btnCtrl(btnRead);
 
+	if(CheckBus() == false)
+	{
+        return;
+    }
 	if (rtc.readDateTimeRaw() == 0)
 	{
 		lblStatus->Caption = "Read OK";
@@ -180,6 +236,32 @@ void TfrmCH341I2CDS1307::Read(void)
 		lblStatus->Caption = "Read error";
 		Clear();
 	}
+}
+void TfrmCH341I2CDS1307::WriteTime(void)
+{
+	if(CheckBus() == false)
+	{
+        return;
+    }
+   if(rtc.setTimeFromString(edTime->Text)) {
+	lblStatus->Caption = "Set Time OK";
+   }
+   else {
+   	lblStatus->Caption = "Set Time Error";
+   }
+}
+void TfrmCH341I2CDS1307::WriteDate(void)
+{
+	if(CheckBus() == false)
+	{
+        return;
+    }
+   if(rtc.setDateFromString(edDate->Text)) {
+	lblStatus->Caption = "Set Date OK";
+   }
+   else {
+   	lblStatus->Caption = "Set Date Error";
+   }
 }
 //---------------------------------------------------------------------------
 __fastcall TfrmCH341I2CDS1307::TfrmCH341I2CDS1307(TComponent* Owner)
@@ -201,8 +283,58 @@ void __fastcall TfrmCH341I2CDS1307::tmrAutoReadTimer(TObject *Sender)
 {
 	tmrAutoRead->Enabled = false;
 	if (chbAutoRead->Checked)
+	{
+		log_info("New Read\n");
 		Read();
+    }
 	tmrAutoRead->Enabled = true;	
+}
+//---------------------------------------------------------------------------
+
+
+void __fastcall TfrmCH341I2CDS1307::chbEnableWriteClick(TObject *Sender)
+{
+	if(chbEnableWrite->Checked)
+	{
+		log_info("enable write\n");
+		chbAutoRead->Checked = false;
+		edTime->Enabled = true;
+		edDate->Enabled = true;
+		btnTimeWrite->Enabled = true;
+		btnDateWrite->Enabled = true;
+	}
+	else {
+		log_info("disable write\n");
+		edTime->Enabled = false;
+		edDate->Enabled = false;
+		btnTimeWrite->Enabled = false;
+		btnDateWrite->Enabled = false;
+    }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341I2CDS1307::chbAutoReadClick(TObject *Sender)
+{
+	if (chbAutoRead->Checked)
+		chbEnableWrite->Checked = false;	
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341I2CDS1307::btnTimeWriteClick(TObject *Sender)
+{
+	if(chbEnableWrite->Checked)
+	{
+		 WriteTime();
+	}
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341I2CDS1307::btnDateWriteClick(TObject *Sender)
+{
+	if(chbEnableWrite->Checked)
+	{
+		WriteDate();
+	}
 }
 //---------------------------------------------------------------------------
 

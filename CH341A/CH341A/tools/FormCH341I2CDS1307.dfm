@@ -49,12 +49,14 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Height = 17
     Caption = 'auto refresh (repeat reading every second)'
     TabOrder = 1
+    OnClick = chbAutoReadClick
   end
   object edTime: TEdit
     Left = 97
     Top = 73
     Width = 121
     Height = 21
+    Enabled = False
     TabOrder = 2
   end
   object edDate: TEdit
@@ -62,6 +64,7 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Top = 104
     Width = 121
     Height = 21
+    Enabled = False
     TabOrder = 3
   end
   object btnTimeWrite: TButton
@@ -70,7 +73,9 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Width = 81
     Height = 25
     Caption = 'Write'
+    Enabled = False
     TabOrder = 4
+    OnClick = btnTimeWriteClick
   end
   object btnDateWrite: TButton
     Left = 264
@@ -78,7 +83,9 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Width = 81
     Height = 25
     Caption = 'Write'
+    Enabled = False
     TabOrder = 5
+    OnClick = btnDateWriteClick
   end
   object chbEnableWrite: TCheckBox
     Left = 264
@@ -87,6 +94,7 @@ object frmCH341I2CDS1307: TfrmCH341I2CDS1307
     Height = 17
     Caption = 'Enable Write'
     TabOrder = 6
+    OnClick = chbEnableWriteClick
   end
   object tmrAutoRead: TTimer
     OnTimer = tmrAutoReadTimer

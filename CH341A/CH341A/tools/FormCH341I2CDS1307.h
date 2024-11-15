@@ -25,9 +25,16 @@ __published:	// IDE-managed Components
 	TLabel *lblStatus;
 	void __fastcall btnReadClick(TObject *Sender);
 	void __fastcall tmrAutoReadTimer(TObject *Sender);
+	void __fastcall chbEnableWriteClick(TObject *Sender);
+	void __fastcall chbAutoReadClick(TObject *Sender);
+	void __fastcall btnTimeWriteClick(TObject *Sender);
+	void __fastcall btnDateWriteClick(TObject *Sender);
 private:	// User declarations
 	void Clear(void);
+	bool CheckBus(void);
 	void Read(void);
+	void WriteTime(void);
+	void WriteDate(void);
 public:		// User declarations
 	__fastcall TfrmCH341I2CDS1307(TComponent* Owner);
 };
