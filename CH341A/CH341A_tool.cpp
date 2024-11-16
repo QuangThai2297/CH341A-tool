@@ -29,7 +29,7 @@ USEFORM("CH341A\tools\FormCH341I2CVl53l0x.cpp", frmCH341I2CVl53l0x);
 USEFORM("CH341A\tools\FormCH341I2CApds9960.cpp", frmCH341I2CApds9960);
 USEFORM("CH341A\tools\FormCH341I2CL3G4200D.cpp", frmCH341I2CL3G4200D);
 USEFORM("CH341A\tools\FormCH341I2CDS1307.cpp", frmCH341I2CDS1307);
-USEFORM("CH341A\tools\FormCH341ComPort.cpp", COM);
+USEFORM("CH341A\tools\FormCH341ComPort.cpp", frmCH341Com);
 //---------------------------------------------------------------------------
 #pragma link "common.lib"
 #pragma link "jsoncpp.lib"
@@ -66,7 +66,7 @@ WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int)
 		Application->CreateForm(__classid(TfrmCH341I2CApds9960), &frmCH341I2CApds9960);
 		Application->CreateForm(__classid(TfrmCH341I2CL3G4200D), &frmCH341I2CL3G4200D);
 		Application->CreateForm(__classid(TfrmCH341I2CDS1307), &frmCH341I2CDS1307);
-		Application->CreateForm(__classid(TCOM), &COM);
+		Application->CreateForm(__classid(TfrmCH341Com), &frmCH341Com);
 		Application->Run();
 	}
 	catch (Exception &exception)

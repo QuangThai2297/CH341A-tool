@@ -46,18 +46,63 @@ private:
     COMSTAT status;
 	DWORD errors;
 public:
-	#define ARDUINO_WAIT_TIME 1000
-	SerialPort(char *portName);
+	#define WAIT_TIME 10
+	SerialPort();
     ~SerialPort();
-
+	 bool Open(char *portName, int baudrate);
+	 bool Close();                            	
     int readSerialPort(char *buffer, unsigned int buf_size);
     bool writeSerialPort(char *buffer, unsigned int buf_size);
  bool isConnected();
 
 };
-
-SerialPort::SerialPort(char *portName)
+SerialPort ser;
+SerialPort::SerialPort()
 {
+   this->handler = NULL;
+   this->connected = false;
+}
+SerialPort::~SerialPort()
+{
+    if (this->connected){
+        this->connected = false;
+		CloseHandle(this->handler);
+		this->handler = NULL;
+    }
+}
+bool SerialPort::Close()
+{
+    if (this->connected){
+        this->connected = false;
+		CloseHandle(this->handler);
+		this->handler = NULL;
+		 log_info("closed port\n");
+	}else {
+		if(this->handler)
+		{
+           CloseHandle(this->handler);
+		   this->handler = NULL;
+		   log_info("closed port\n");
+		}
+		else {
+            log_info("not open before\n");
+        }
+	}
+	return true;
+}
+bool SerialPort::Open(char *portName, int baudrate)
+{
+	if(this->handler)
+	{
+		if(this->connected)
+		{
+			log_info("ready openned\n");
+			return true;
+        }
+	}
+	String log;
+	log.sprintf("open with COM: %s, baud: %d", portName, baudrate);
+	log_info(log);
 	this->connected = false;
 
 	this->handler = CreateFileA(static_cast<LPCSTR>(portName),
@@ -84,11 +129,11 @@ SerialPort::SerialPort(char *portName)
 			log_info("failed to get current serial parameters");
         }
         else {
-            dcbSerialParameters.BaudRate = CBR_9600;
+            dcbSerialParameters.BaudRate = baudrate;
             dcbSerialParameters.ByteSize = 8;
             dcbSerialParameters.StopBits = ONESTOPBIT;
             dcbSerialParameters.Parity = NOPARITY;
-            dcbSerialParameters.fDtrControl = DTR_CONTROL_ENABLE;
+            dcbSerialParameters.fDtrControl = DTR_CONTROL_DISABLE;
 
             if (!SetCommState(handler, &dcbSerialParameters))
             {
@@ -97,19 +142,14 @@ SerialPort::SerialPort(char *portName)
             else {
                 this->connected = true;
                 PurgeComm(this->handler, PURGE_RXCLEAR | PURGE_TXCLEAR);
-                Sleep(ARDUINO_WAIT_TIME);
+				Sleep(WAIT_TIME);
+				return true;
             }
         }
-    }
+	}
+	return false;
 }
 
-SerialPort::~SerialPort()
-{
-    if (this->connected){
-        this->connected = false;
-        CloseHandle(this->handler);
-    }
-}
 
 int SerialPort::readSerialPort(char *buffer, unsigned int buf_size)
 {
@@ -149,18 +189,45 @@ bool SerialPort::isConnected()
 //---------------------------------------------------------------------------
 void __fastcall TfrmCH341Com::btnOpenCloseClick(TObject *Sender)
 {
-	log_info("open com\n");
-	lblStatus->Caption = "";
-	SerialPort comport("\\\\.\\COM10");
-	if(comport.isConnected())
+	if(ser.isConnected())
 	{
-		log_info("open com ok\n");
-		lblStatus->Caption = "Open com success";
+		log_info("close com\n");
+		if(!ser.Close())
+		{
+             log_info("close fail\n");
+		}
+		if(!ser.isConnected())
+		{
+			log_info("close com ok\n");
+			btnOpenClose->Caption = "Open";
+			lblStatus->Caption = "Close com success";
+		}
+		else {
+			log_info("close com fail\n");
+		  	lblStatus->Caption = "Close com fail";
+		}
 	}
 	else {
-		  log_info("open com fail\n");
-		  lblStatus->Caption = "Open com fail";
+		log_info("open com\n");
+		lblStatus->Caption = "";
+		String s = "\\\\.\\" + cbComSelect->Items->Strings[cbComSelect->ItemIndex];
+		if(!ser.Open(s.c_str(),
+					cbBaudSelect->Items->Strings[cbBaudSelect->ItemIndex].ToInt()))
+					{
+                         log_info("open fail\n");
+                    }
+		if(ser.isConnected())
+		{
+			log_info("open com ok\n");
+			btnOpenClose->Caption = "Close";
+			lblStatus->Caption = "Open com success";
+		}
+		else {
+			log_info("open com fail\n");
+		  	lblStatus->Caption = "Open com fail";
+		}
     }
+
 }
 //---------------------------------------------------------------------------
 
