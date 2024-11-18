@@ -19,12 +19,18 @@ __published:	// IDE-managed Components
 	TMemo *memoRead;
 	TButton *btnSend;
 	TCheckBox *chbHexWrite;
-	TButton *btnClear;
+	TButton *btnClearRead;
 	TComboBox *cbBaudSelect;
 	TLabel *lblBaud;
 	TCheckBox *chbHexRead;
+	TButton *btnClearWrite;
+	TLabel *lblByteCount;
 	void __fastcall btnOpenCloseClick(TObject *Sender);
 	void __fastcall cbComSelectChange(TObject *Sender);
+	void __fastcall memoWriteChange(TObject *Sender);
+	void __fastcall chbHexWriteClick(TObject *Sender);
+	void __fastcall btnClearWriteClick(TObject *Sender);
+	void __fastcall btnSendClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfrmCH341Com(TComponent* Owner);

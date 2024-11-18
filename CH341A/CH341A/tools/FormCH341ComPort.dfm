@@ -16,8 +16,8 @@ object frmCH341Com: TfrmCH341Com
   object lblStatus: TLabel
     Left = 92
     Top = 53
-    Width = 4
-    Height = 15
+    Width = 3
+    Height = 13
   end
   object lblCom: TLabel
     Left = 59
@@ -29,9 +29,16 @@ object frmCH341Com: TfrmCH341Com
   object lblBaud: TLabel
     Left = 184
     Top = 29
-    Width = 55
+    Width = 44
     Height = 13
     Caption = 'Baudrate'
+  end
+  object lblByteCount: TLabel
+    Left = 377
+    Top = 86
+    Width = 47
+    Height = 13
+    Caption = '0 byte (s)'
   end
   object btnOpenClose: TButton
     Left = 322
@@ -53,25 +60,31 @@ object frmCH341Com: TfrmCH341Com
   end
   object memoWrite: TMemo
     Left = 88
-    Top = 82
+    Top = 74
     Width = 217
-    Height = 49
+    Height = 60
+    ScrollBars = ssVertical
     TabOrder = 2
+    OnChange = memoWriteChange
   end
   object memoRead: TMemo
     Left = 88
     Top = 151
     Width = 217
     Height = 62
+    Color = clMenu
+    ReadOnly = True
+    ScrollBars = ssVertical
     TabOrder = 3
   end
   object btnSend: TButton
-    Left = 322
+    Left = 377
     Top = 109
     Width = 75
     Height = 25
     Caption = 'Send'
     TabOrder = 4
+    OnClick = btnSendClick
   end
   object chbHexWrite: TCheckBox
     Left = 322
@@ -80,11 +93,12 @@ object frmCH341Com: TfrmCH341Com
     Height = 17
     Caption = 'Hex'
     TabOrder = 5
+    OnClick = chbHexWriteClick
   end
-  object btnClear: TButton
+  object btnClearRead: TButton
     Left = 322
     Top = 184
-    Width = 75
+    Width = 49
     Height = 25
     Caption = 'Clear'
     TabOrder = 6
@@ -113,5 +127,14 @@ object frmCH341Com: TfrmCH341Com
     Height = 17
     Caption = 'Hex'
     TabOrder = 8
+  end
+  object btnClearWrite: TButton
+    Left = 322
+    Top = 109
+    Width = 49
+    Height = 25
+    Caption = 'Clear'
+    TabOrder = 9
+    OnClick = btnClearWriteClick
   end
 end

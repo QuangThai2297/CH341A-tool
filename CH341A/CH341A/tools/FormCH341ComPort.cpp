@@ -6,6 +6,8 @@
 #include "FormCH341ComPort.h"
 #include "TabManager.h"
 #include "stdio.h"
+#include <vector>
+#include "common/bin2str.h"
 //---------------------------------------------------------------------------
 #pragma package(smart_init)
 #pragma resource "*.dfm"
@@ -45,6 +47,8 @@ private:
     bool connected;
     COMSTAT status;
 	DWORD errors;
+	std::vector<uint8_t> writeData;
+	std::vector<uint8_t> readData;
 public:
 	#define WAIT_TIME 10
 	SerialPort();
@@ -52,8 +56,10 @@ public:
 	 bool Open(char *portName, int baudrate);
 	 bool Close();                            	
     int readSerialPort(char *buffer, unsigned int buf_size);
-    bool writeSerialPort(char *buffer, unsigned int buf_size);
- bool isConnected();
+	bool writeSerialPort(char *buffer, unsigned int buf_size);
+	bool isConnected();
+	int updateDataToWrite(AnsiString text, bool isHex);
+	bool sendDataWrite();
 
 };
 SerialPort ser;
@@ -133,7 +139,7 @@ bool SerialPort::Open(char *portName, int baudrate)
             dcbSerialParameters.ByteSize = 8;
             dcbSerialParameters.StopBits = ONESTOPBIT;
             dcbSerialParameters.Parity = NOPARITY;
-            dcbSerialParameters.fDtrControl = DTR_CONTROL_DISABLE;
+            dcbSerialParameters.fDtrControl = DTR_CONTROL_ENABLE;
 
             if (!SetCommState(handler, &dcbSerialParameters))
             {
@@ -153,16 +159,16 @@ bool SerialPort::Open(char *portName, int baudrate)
 
 int SerialPort::readSerialPort(char *buffer, unsigned int buf_size)
 {
-    DWORD bytesRead;
+	DWORD bytesRead;
     unsigned int toRead;
 
     ClearCommError(this->handler, &this->errors, &this->status);
 
 	if (this->status.cbInQue > 0){
-        if (this->status.cbInQue > buf_size){
-            toRead = buf_size;
+		if (this->status.cbInQue > buf_size){
+			toRead = buf_size;
         }
-        else toRead = this->status.cbInQue;
+		else toRead = this->status.cbInQue;
     }
 
 	if (ReadFile(this->handler, buffer, toRead, &bytesRead, NULL)) return bytesRead;
@@ -185,7 +191,37 @@ bool SerialPort::isConnected()
 {
  return this->connected;
 }
+int SerialPort::updateDataToWrite(AnsiString text, bool isHex)
+{
+	int status;
+	AnsiString msg;
+	
+	if(isHex)
+	{
+		status = HexStringCleanToBuf(text, msg, writeData);
+	}
+	else {
+		std::string str;
+		str = text.c_str() ;
+		writeData.assign(str.begin(), str.end());
+	}
 
+	(void)status;
+
+	return writeData.size();
+}
+bool SerialPort::sendDataWrite()
+{
+	if(ser.writeSerialPort(&writeData[0], writeData.size()))
+	{
+		log_info("write success\n");
+		return true;
+	}
+	else {
+		log_info("write fail\n");
+		return false;
+    }
+}
 //---------------------------------------------------------------------------
 void __fastcall TfrmCH341Com::btnOpenCloseClick(TObject *Sender)
 {
@@ -235,6 +271,46 @@ void __fastcall TfrmCH341Com::btnOpenCloseClick(TObject *Sender)
 void __fastcall TfrmCH341Com::cbComSelectChange(TObject *Sender)
 {
 	//GetCommPorts
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::memoWriteChange(TObject *Sender)
+{
+	int count;
+	
+	if(chbHexWrite->Checked)
+	{
+		count = ser.updateDataToWrite(memoWrite->Text, true);
+	}
+	else {
+		count = ser.updateDataToWrite(memoWrite->Text, false);
+	}
+
+	AnsiString text;
+	text.sprintf("%u byte(s)",count);
+	lblByteCount->Caption = text;
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::chbHexWriteClick(TObject *Sender)
+{
+	memoWriteChange(Sender);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::btnClearWriteClick(TObject *Sender)
+{
+	memoWrite->Text = "";
+    memoWriteChange(Sender);
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::btnSendClick(TObject *Sender)
+{
+	if(!ser.sendDataWrite())
+	{
+        lblStatus->Caption = "Send error";
+    }
 }
 //---------------------------------------------------------------------------
 
