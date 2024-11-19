@@ -33,7 +33,7 @@ static void	log_info(String text)
 			AllocConsole();
 			handle = GetStdHandle(STD_OUTPUT_HANDLE);
 		}
-		text += "\n";
+		//text += "\n";
 		WriteConsole(handle, text.c_str(), text.Length(), 0, 0);
 	}
 
@@ -51,6 +51,7 @@ private:
 	std::vector<uint8_t> readData;
 public:
 	#define WAIT_TIME 10
+	#define MAX_READ_LEN 2000
 	SerialPort();
     ~SerialPort();
 	 bool Open(char *portName, int baudrate);
@@ -60,6 +61,9 @@ public:
 	bool isConnected();
 	int updateDataToWrite(AnsiString text, bool isHex);
 	bool sendDataWrite();
+	bool updateDataRead(char* buf, int len);
+	AnsiString getStringReadData(bool isHex);
+	void clearReadData();
 
 };
 SerialPort ser;
@@ -203,9 +207,13 @@ int SerialPort::updateDataToWrite(AnsiString text, bool isHex)
 	else {
 		std::string str;
 		str = text.c_str() ;
+		writeData.clear();
 		writeData.assign(str.begin(), str.end());
 	}
-
+	if(text == "")
+	{
+		writeData.clear();      //should clear to free capacity of vector
+    }
 	(void)status;
 
 	return writeData.size();
@@ -220,6 +228,50 @@ bool SerialPort::sendDataWrite()
 	else {
 		log_info("write fail\n");
 		return false;
+    }
+}
+bool SerialPort::updateDataRead(char* buf, int len)
+{
+	 log_info("\nreceive len " + IntToStr(len) + "bytes\n");
+	 if(len > MAX_READ_LEN)
+	 {
+	 		log_info("pls inc read len\n");
+         return false;
+     }
+	 if(this->readData.size() + len > MAX_READ_LEN)
+	 {
+	 	this->readData.clear();
+	 }
+	 for(int i = 0; i < len; i++)
+	 {
+		this->readData.push_back(buf[i]);
+	 }
+     log_info("read size: " + IntToStr(readData.size() ) + "\n");
+//	 for(uint8_t item = 0; item < readData.size(); item++)
+//	 {
+//         log_info(IntToStr((int)readData[item]) + " ");
+//	 }
+	 return true;
+}
+void SerialPort::clearReadData()
+{
+    readData.clear();
+}
+AnsiString SerialPort::getStringReadData(bool isHex)
+{
+
+	if(isHex)
+	{
+		AnsiString str = "";
+		for(uint8_t item = 0; item < readData.size(); item++)
+		{
+          str += intToHexString((int)readData[item]).c_str();
+	 	}
+        return str;
+	}
+	else {
+		AnsiString str((char*)&readData[0], readData.size());
+		return str;
     }
 }
 //---------------------------------------------------------------------------
@@ -311,6 +363,31 @@ void __fastcall TfrmCH341Com::btnSendClick(TObject *Sender)
 	{
         lblStatus->Caption = "Send error";
     }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::tmrReadCheckTimer(TObject *Sender)
+{
+	char buf[100];
+	int bytes_count = ser.readSerialPort(buf, 100);
+	if(bytes_count)
+	{
+		ser.updateDataRead(buf, bytes_count);
+		memoRead->Text = ser.getStringReadData(chbHexRead->Checked);
+    }
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::btnClearReadClick(TObject *Sender)
+{
+     ser.clearReadData();
+     memoRead->Clear();
+}
+//---------------------------------------------------------------------------
+
+void __fastcall TfrmCH341Com::chbHexReadClick(TObject *Sender)
+{
+     memoRead->Text = ser.getStringReadData(chbHexRead->Checked);
 }
 //---------------------------------------------------------------------------
 

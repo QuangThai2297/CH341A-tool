@@ -102,6 +102,7 @@ object frmCH341Com: TfrmCH341Com
     Height = 25
     Caption = 'Clear'
     TabOrder = 6
+    OnClick = btnClearReadClick
   end
   object cbBaudSelect: TComboBox
     Left = 232
@@ -127,6 +128,7 @@ object frmCH341Com: TfrmCH341Com
     Height = 17
     Caption = 'Hex'
     TabOrder = 8
+    OnClick = chbHexReadClick
   end
   object btnClearWrite: TButton
     Left = 322
@@ -136,5 +138,11 @@ object frmCH341Com: TfrmCH341Com
     Caption = 'Clear'
     TabOrder = 9
     OnClick = btnClearWriteClick
+  end
+  object tmrReadCheck: TTimer
+    Interval = 100
+    OnTimer = tmrReadCheckTimer
+    Left = 408
+    Top = 176
   end
 end
