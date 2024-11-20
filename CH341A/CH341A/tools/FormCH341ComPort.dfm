@@ -2,8 +2,8 @@ object frmCH341Com: TfrmCH341Com
   Left = 0
   Top = 0
   Caption = 'COM'
-  ClientHeight = 245
-  ClientWidth = 511
+  ClientHeight = 397
+  ClientWidth = 483
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
   Font.Color = clWindowText
@@ -14,21 +14,21 @@ object frmCH341Com: TfrmCH341Com
   PixelsPerInch = 96
   TextHeight = 13
   object lblStatus: TLabel
-    Left = 92
-    Top = 53
+    Left = 68
+    Top = 55
     Width = 3
     Height = 13
   end
   object lblCom: TLabel
-    Left = 59
-    Top = 29
+    Left = 35
+    Top = 31
     Width = 23
     Height = 13
     Caption = 'COM'
   end
   object lblBaud: TLabel
-    Left = 184
-    Top = 29
+    Left = 168
+    Top = 31
     Width = 44
     Height = 13
     Caption = 'Baudrate'
@@ -50,8 +50,8 @@ object frmCH341Com: TfrmCH341Com
     OnClick = btnOpenCloseClick
   end
   object cbComSelect: TComboBox
-    Left = 88
-    Top = 26
+    Left = 64
+    Top = 28
     Width = 81
     Height = 21
     ItemHeight = 13
@@ -59,19 +59,19 @@ object frmCH341Com: TfrmCH341Com
     OnChange = cbComSelectChange
   end
   object memoWrite: TMemo
-    Left = 88
+    Left = 24
     Top = 74
-    Width = 217
-    Height = 60
+    Width = 281
+    Height = 95
     ScrollBars = ssVertical
     TabOrder = 2
     OnChange = memoWriteChange
   end
   object memoRead: TMemo
-    Left = 88
-    Top = 151
-    Width = 217
-    Height = 62
+    Left = 24
+    Top = 190
+    Width = 281
+    Height = 199
     Color = clMenu
     ReadOnly = True
     ScrollBars = ssVertical
@@ -83,6 +83,7 @@ object frmCH341Com: TfrmCH341Com
     Width = 75
     Height = 25
     Caption = 'Send'
+    Enabled = False
     TabOrder = 4
     OnClick = btnSendClick
   end
@@ -97,7 +98,7 @@ object frmCH341Com: TfrmCH341Com
   end
   object btnClearRead: TButton
     Left = 322
-    Top = 184
+    Top = 256
     Width = 49
     Height = 25
     Caption = 'Clear'
@@ -105,8 +106,8 @@ object frmCH341Com: TfrmCH341Com
     OnClick = btnClearReadClick
   end
   object cbBaudSelect: TComboBox
-    Left = 232
-    Top = 26
+    Left = 216
+    Top = 28
     Width = 73
     Height = 21
     ItemHeight = 13
@@ -123,7 +124,7 @@ object frmCH341Com: TfrmCH341Com
   end
   object chbHexRead: TCheckBox
     Left = 322
-    Top = 161
+    Top = 201
     Width = 49
     Height = 17
     Caption = 'Hex'
@@ -139,10 +140,27 @@ object frmCH341Com: TfrmCH341Com
     TabOrder = 9
     OnClick = btnClearWriteClick
   end
+  object chbAlignReadData: TCheckBox
+    Left = 377
+    Top = 201
+    Width = 97
+    Height = 17
+    Caption = 'Alignment'
+    TabOrder = 10
+    OnClick = chbAlignReadDataClick
+  end
+  object chbPause: TCheckBox
+    Left = 322
+    Top = 224
+    Width = 97
+    Height = 17
+    Caption = 'Pause'
+    TabOrder = 11
+  end
   object tmrReadCheck: TTimer
     Interval = 100
     OnTimer = tmrReadCheckTimer
     Left = 408
-    Top = 176
+    Top = 216
   end
 end

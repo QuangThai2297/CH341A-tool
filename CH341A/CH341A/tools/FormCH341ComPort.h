@@ -27,6 +27,8 @@ __published:	// IDE-managed Components
 	TButton *btnClearWrite;
 	TLabel *lblByteCount;
 	TTimer *tmrReadCheck;
+	TCheckBox *chbAlignReadData;
+	TCheckBox *chbPause;
 	void __fastcall btnOpenCloseClick(TObject *Sender);
 	void __fastcall cbComSelectChange(TObject *Sender);
 	void __fastcall memoWriteChange(TObject *Sender);
@@ -36,6 +38,7 @@ __published:	// IDE-managed Components
 	void __fastcall tmrReadCheckTimer(TObject *Sender);
 	void __fastcall btnClearReadClick(TObject *Sender);
 	void __fastcall chbHexReadClick(TObject *Sender);
+	void __fastcall chbAlignReadDataClick(TObject *Sender);
 private:	// User declarations
 public:		// User declarations
 	__fastcall TfrmCH341Com(TComponent* Owner);

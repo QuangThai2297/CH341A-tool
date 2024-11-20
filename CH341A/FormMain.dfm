@@ -1,7 +1,7 @@
 object frmMain: TfrmMain
   Left = 0
   Top = 0
-  Caption = 'CH341 tool'
+  Caption = 'CH341 tool [Thai NG customize]'
   ClientHeight = 341
   ClientWidth = 622
   Color = clBtnFace
@@ -27,7 +27,6 @@ object frmMain: TfrmMain
     Width = 622
     Height = 19
     Panels = <>
-    ExplicitWidth = 602
   end
   object MainMenu: TMainMenu
     Left = 8

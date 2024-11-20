@@ -62,7 +62,7 @@ public:
 	int updateDataToWrite(AnsiString text, bool isHex);
 	bool sendDataWrite();
 	bool updateDataRead(char* buf, int len);
-	AnsiString getStringReadData(bool isHex);
+	AnsiString getStringReadData(bool isHex, bool isAlign);
 	void clearReadData();
 
 };
@@ -240,14 +240,26 @@ bool SerialPort::updateDataRead(char* buf, int len)
      }
 	 if(this->readData.size() + len > MAX_READ_LEN)
 	 {
-	 	this->readData.clear();
+	 //should hold last 10% bytes lastest
+		int lenHold =  MAX_READ_LEN/10;
+		if(lenHold > readData.size())
+		{
+			lenHold = readData.size();
+		}
+		log_info("\nlen hold " + IntToStr(lenHold) + "bytes\n");
+		std::vector<uint8_t> holdTemp;
+		holdTemp.assign(readData.end() - lenHold,readData.end());
+
+		this->readData.clear();
+		readData.assign(holdTemp.begin(), holdTemp.end());
 	 }
 	 for(int i = 0; i < len; i++)
 	 {
 		this->readData.push_back(buf[i]);
 	 }
-     log_info("read size: " + IntToStr(readData.size() ) + "\n");
-//	 for(uint8_t item = 0; item < readData.size(); item++)
+	 log_info("read size: " + IntToStr(readData.size() ) + "\n");
+	 log_info("\nread capacity " + IntToStr(readData.capacity()) + "\n");
+//	 for(int item = 0; item < readData.size(); item++)
 //	 {
 //         log_info(IntToStr((int)readData[item]) + " ");
 //	 }
@@ -257,15 +269,23 @@ void SerialPort::clearReadData()
 {
     readData.clear();
 }
-AnsiString SerialPort::getStringReadData(bool isHex)
+AnsiString SerialPort::getStringReadData(bool isHex, bool isAlign)
 {
 
 	if(isHex)
 	{
 		AnsiString str = "";
-		for(uint8_t item = 0; item < readData.size(); item++)
+		for(int item = 0; item < readData.size(); item++)
 		{
-          str += intToHexString((int)readData[item]).c_str();
+		  str += intToHexString((int)readData[item]).c_str();
+		  if(isAlign)
+		  {
+			  str += " ";
+			  if((item+1) % 16 == 0)
+			  {
+                  str+= "\r\n";
+              }
+          }
 	 	}
         return str;
 	}
@@ -294,6 +314,9 @@ void __fastcall TfrmCH341Com::btnOpenCloseClick(TObject *Sender)
 			log_info("close com fail\n");
 		  	lblStatus->Caption = "Close com fail";
 		}
+		cbComSelect->Enabled = true;
+		cbBaudSelect->Enabled = true;
+		btnSend->Enabled = false;
 	}
 	else {
 		log_info("open com\n");
@@ -309,6 +332,9 @@ void __fastcall TfrmCH341Com::btnOpenCloseClick(TObject *Sender)
 			log_info("open com ok\n");
 			btnOpenClose->Caption = "Close";
 			lblStatus->Caption = "Open com success";
+			cbComSelect->Enabled = false;
+			cbBaudSelect->Enabled = false;
+			btnSend->Enabled = true;
 		}
 		else {
 			log_info("open com fail\n");
@@ -373,8 +399,17 @@ void __fastcall TfrmCH341Com::tmrReadCheckTimer(TObject *Sender)
 	if(bytes_count)
 	{
 		ser.updateDataRead(buf, bytes_count);
-		memoRead->Text = ser.getStringReadData(chbHexRead->Checked);
-    }
+		
+		if(!chbPause->Checked)
+		{
+        	memoRead->Clear();
+        	memoRead->Text = ser.getStringReadData(chbHexRead->Checked, chbAlignReadData->Checked);
+			//memoRead->Perform(WM_VSCROLL, SB_LINEDOWN, 0);
+			//SendMessageW(memoRead->Handle, WM_VSCROLL, SB_LINEDOWN, 0);
+			SendMessageW(memoRead->Handle, EM_LINESCROLL, 0,memoRead->Lines->Count);
+        }
+		//log_info("lines count " + IntToStr(memoRead->Lines->Count) + "\n" );
+	}
 }
 //---------------------------------------------------------------------------
 
@@ -387,7 +422,18 @@ void __fastcall TfrmCH341Com::btnClearReadClick(TObject *Sender)
 
 void __fastcall TfrmCH341Com::chbHexReadClick(TObject *Sender)
 {
-     memoRead->Text = ser.getStringReadData(chbHexRead->Checked);
+	memoRead->Clear();
+	 memoRead->Text = ser.getStringReadData(chbHexRead->Checked, chbAlignReadData->Checked);
 }
 //---------------------------------------------------------------------------
+
+
+void __fastcall TfrmCH341Com::chbAlignReadDataClick(TObject *Sender)
+{
+	memoRead->Clear();
+	 memoRead->Text = ser.getStringReadData(chbHexRead->Checked, chbAlignReadData->Checked);
+}
+//---------------------------------------------------------------------------
+
+
 
